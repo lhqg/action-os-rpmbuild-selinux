@@ -1,0 +1,35 @@
+name: 'Run Semodule Build on container'
+description: 'Build SELinux modules on targeted OS'
+
+inputs:
+  source_repo_location:
+    description: 'Provides the directory where the source repository was checked out'
+    required: true
+    default: 'SOURCE_REPO'
+  spec_file_location:
+    description: 'Provides the relative path to the source repository of the SPEC file'
+    required: true
+    default: ''
+  selinux_files_location:
+    description: 'Provides the relative path to the source repository of the SELinux files'
+    required: true
+    default: ''
+  provided_version:
+    description: 'RPM version if parameter'
+    required: true
+    default: ''  
+  provided_release:
+    description: 'RPM release if parameter'
+    required: true
+    default: ''
+  gpg_name:
+    description: 'GPG pretty name of the key'
+    required: true
+    default: ''
+  gpg_private_key_file:
+    description: 'GPG key file'
+    required: true
+    default: ''
+runs:
+  using: 'docker'
+  image: Dockerfile
