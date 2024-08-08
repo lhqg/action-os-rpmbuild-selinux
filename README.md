@@ -1,14 +1,14 @@
-![GitHub Release (latest SemVer)](https://img.shields.io/github/v/release/lhqg/actions)
+![GitHub Release (latest SemVer)](https://img.shields.io/github/v/release/lhqg/action-os-rpmbuild-selinux)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
-[![GitHub Issues](https://img.shields.io/github/issues/lhqg/actions)](https://github.com/lhqg/actions/issues)
-[![GitHub PR](https://img.shields.io/github/issues-pr/lhqg/actions)](https://github.com/lhqg/actions/pulls)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/lhqg/actions)](https://github.com/lhqg/selinux_cassandra/commits/main)
-[![GitHub Last commit](https://img.shields.io/github/last-commit/lhqg/actions)](https://github.com/lhqg/actions/commits/main)
-![GitHub Downloads](https://img.shields.io/github/downloads/lhqg/actions/total)
+[![GitHub Issues](https://img.shields.io/github/issues/lhqg/action-os-rpmbuild-selinux)](https://github.com/lhqg/action-os-rpmbuild-selinux/issues)
+[![GitHub PR](https://img.shields.io/github/issues-pr/lhqg/action-os-rpmbuild-selinux)](https://github.com/lhqg/action-os-rpmbuild-selinux/pulls)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/lhqg/action-os-rpmbuild-selinux)](https://github.com/lhqg/selinux_cassandra/commits/main)
+[![GitHub Last commit](https://img.shields.io/github/last-commit/lhqg/action-os-rpmbuild-selinux)](https://github.com/lhqg/action-os-rpmbuild-selinux/commits/main)
+![GitHub Downloads](https://img.shields.io/github/downloads/lhqg/action-os-rpmbuild-selinux/total)
 
-Actions repository for LHQG to build SELinux RPMs on targeted OS
+Action repository for LHQG to build SELinux RPMs on targeted OS
 ==========================================================
-https://github.com/lhqg/actions
+https://github.com/lhqg/action-os-rpmbuild-selinux
 
 ## Introduction
 
