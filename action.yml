@@ -1,7 +1,21 @@
 name: 'Run Semodule Build on container'
 description: 'Build SELinux modules on targeted OS'
 
+branding:
+  color:  green
+  icon: package
+
 inputs:
+  distro:
+    description: 'Name of the GNU/Linux distribution, i.e. `centos` or `fedora` or `almalinux`...'
+    required: true
+  distro_version:
+    description: 'Version number or name of the GNU/Linux distribution'
+    required: true
+  platform:
+    description: 'Platform name, i.e. `amd64` (default) or `i386`.'
+    required: false
+    default: 'amd64'
   source_repo_location:
     description: 'Provides the directory where the source repository was checked out'
     required: true
@@ -30,6 +44,65 @@ inputs:
     description: 'GPG key file'
     required: true
     default: ''
+
 runs:
-  using: 'docker'
-  image: Dockerfile
+  using: 'composite'
+
+  steps:
+    - name: Verify inputs
+      shell: bash
+      run: |
+        grep -qE '^(almalinux|fedora|rhel|centos|rockylinux)$' <<< "${{ inputs.distro }}"
+        if [ $? -ne 0 ]
+        then
+          echo '::error::Distribution must be one of almalinux,fedora,rhel,centos,rockylinux.'
+          exit 1
+        fi
+
+        grep -qEi '^[a-z0-9_.-]+/?$' <<< '${{inputs.source_repo_location}}'
+        if [ $? -ne 0 ]
+        then
+          echo '::error::Illegal character(s) detected in `source_repo_location`.'
+          exit 1
+        fi
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: ${{github.action_path}}
+        push: false
+        tags: LHQG/${{ inputs.distro }}-${{ inputs.distro_version }}-${{ inputs.platform }}:latest
+        cache-from: type=gha
+        cache-to: type=gha
+        outputs: type=docker
+        platforms: ${{inputs.platform}}
+        build-args: |
+          DISTRIBUTION=${{inputs.distro}}
+          DISTRO_VERSN=${{inputs.distro_version}}
+          PLATFORM=${{inputs.platform}}
+
+    - name: Build DEB package in docker image
+      shell: bash
+      run: |
+        docker run --platform="${{inputs.platform}}" \
+          -v "/var/run/docker.sock":"/var/run/docker.sock" \
+          -v "${{github.workspace}}":/source \
+          --env INPUT_SOURCE_REPO_LOCATION \
+          --env INPUT_SPEC_FILE_LOCATION \
+          --env INPUT_PROVIDED_VERSION \
+          --env INPUT_PROVIDED_RELEASE \
+          --env INPUT_SIGNING_KEY_NAME \
+          --env INPUT_SIGNING_KEY_FILE \
+          --workdir /source "${IMAGE_NAME}"
+      working-directory: ${{github.workspace}}
+      env:
+        INPUT_SOURCE_REPO_LOCATION: "${{inputs.source_repo_location}}"
+        INPUT_SPEC_FILE_LOCATION: "${{inputs.spec_file_location}}"
+        INPUT_PROVIDED_VERSION: "${{inputs.provided_version}}"
+        INPUT_PROVIDED_RELEASE: "${{inputs.provided_release}}"
+        INPUT_SIGNING_KEY_NAME: "${{inputs.gpg_name}}"
+        INPUT_SIGNING_KEY_FILE: "${{inputs.gpg_private_key_file}}"
+        IMAGE_NAME: "LHQG/${{ inputs.distro }}-${{ inputs.distro_version }}-${{ inputs.platform }}:latest"
