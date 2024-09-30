@@ -1,7 +1,31 @@
 #! /bin/bash
 
 RC=0
-WORKDIR=/github/workspace
+WORKDIR=/source
+
+LOCKFILE=${WORKDIR}/.lock
+
+GPG_PRIVATE_KEY_NAME="${INPUT_SIGNING_KEY_NAME}"
+GPG_PRIVATE_KEY_FILE="${INPUT_SIGNING_KEY_FILE}"
+
+if [ -f ${LOCKFILE} ]
+then
+  count=0
+  waittime=20
+  while [ $count -lt 10 -a -f $LOCKFILE ]
+  do
+    echo "::notice title=RPMbuild::Lock file found, waiting ${waittime}s"
+    sleep $waittime
+    count=$((count + 1))
+  done
+  if [ -f ${LOCKFILE}]
+  then
+    echo "::error title=RPMbuild::Lock still present, aborting."
+    exit 127
+  fi
+fi
+
+touch $LOCKFILE
 
 pwd
 
@@ -49,20 +73,25 @@ then
   #Signing all rpms that were created
   if [ $RC -eq 0 ] 
   then
-    gpg --batch  --passphrase-file .${INPUT_GPG_PRIVATE_KEY_FILE}.passphrase --import ${INPUT_GPG_PRIVATE_KEY_FILE}
+    gpg --batch  --passphrase-file ${WORKDIR}/.${GPG_PRIVATE_KEY_FILE}.passphrase --import ${WORKDIR}/${GPG_PRIVATE_KEY_FILE}
     rc1=$?
     [ $rc1 -ne 0 ] && echo "::error title=RPMbuild::Could not import private key."
 
     export GPG_TTY=$(tty)
-    rpmsign --define="_gpg_name ${INPUT_GPG_NAME}" --define="_gpg_sign_cmd_extra_args --batch --passphrase-file .${INPUT_GPG_PRIVATE_KEY_FILE}.passphrase --pinentry-mode loopback" --addsign ${WORKDIR}/rpmbuild/RPMS/*/*.rpm
+    rpmsign --define="_gpg_name ${GPG_PRIVATE_KEY_NAME}" \
+      --define="_gpg_sign_cmd_extra_args --batch --passphrase-file ${WORKDIR}/.${GPG_PRIVATE_KEY_FILE}.passphrase --pinentry-mode loopback" \
+      --addsign ${WORKDIR}/rpmbuild/RPMS/*/*.rpm
     rc2=$?
     [ $rc2 -ne 0 ] && echo "::error title=RPMbuild::Could not sign the RPMs that were previously generated."
     rpm -qpi ${WORKDIR}/rpmbuild/RPMS/*/*.rpm | grep ^Sign
     rc2=$(( $rc2 + $? ))
+
+    RC=$(( $RC + $rc1 + $rc2 ))
   fi
-  RC=$(( $RC + $rc1 + $rc2 ))
 else
   echo "::error title=RPMbuild::Unable to create directories under ${WORKDIR}"
 fi
+
+rm -f $LOCKFILE
 
 exit $RC
