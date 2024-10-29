@@ -24,10 +24,6 @@ inputs:
     description: 'Provides the relative path to the source repository of the SPEC file'
     required: true
     default: ''
-  selinux_files_location:
-    description: 'Provides the relative path to the source repository of the SELinux files'
-    required: true
-    default: ''
   provided_version:
     description: 'RPM version if parameter'
     required: true
@@ -84,7 +80,7 @@ runs:
           DISTRO_VERSN=${{inputs.distro_version}}
           PLATFORM=${{inputs.platform}}
 
-    - name: Build DEB package in docker image
+    - name: Build RPM package in docker image
       shell: bash
       run: |
         docker run --platform="${{inputs.platform}}" \
