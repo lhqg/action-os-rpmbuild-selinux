@@ -15,7 +15,7 @@ ENV INPUT_SIGNING_KEY_NAME=""
 ENV INPUT_SIGNING_KEY_FILE=""
 
 # Install build environment
-RUN dnf install -y selinux-policy-devel rpm-build rpm-sign
+RUN dnf install -y selinux-policy-devel rpm-build rpm-sign gnupg2
 
 COPY ./build.sh .
 
